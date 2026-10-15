@@ -1,231 +1,345 @@
-The Harmony Axis
+# The Harmony Axis
 
-Investigating the Geometry of Pain-Associated Representations in Language Models
+Investigating Antipodal Representations and Latent-State Dynamics in Gemma
+
+An exploratory mechanistic interpretability project examining the representational and behavioral consequences of inverting a pain-associated activation direction.
 
 <p align="center">
-  <em>Can the inverse of a pain-associated activation direction produce a distinct, measurable computational state?</em>
+  <em>When a direction associated with pain is reversed, what changes—and what remains invariant?</em>
 </p>
 
-⸻
+---
 
-Overview
+## Overview
 
-The Harmony Axis is an exploratory mechanistic interpretability project investigating the representational and behavioral consequences of inverting pain-associated activation directions in transformer language models.
+The Harmony Axis investigates the computational consequences of reversing a pain-associated representation in a language model.
 
-Building on research into pain-associated representations and causal activation steering, this project proposes a controlled investigation of the inverse of a candidate Pain Axis in open-weight Gemma models.
+Building on methods introduced in "The Pain Axis: LLMs Represent Self-Directed Harm and Act to Relieve It", this project examines whether the inverse of a pain-associated activation direction produces a distinguishable, reproducible pattern of representational and behavioral change.
 
-The central question is not whether reversing a vector mathematically produces its opposite. It does.
+The central intervention is mathematically simple:
 
-The question is whether that mathematical inversion corresponds to a distinct, reproducible change in the model’s internal representations and observable behavior.
+$$
+\mathbf{v}_H = -\mathbf{v}_P
+$$
 
-We investigate this question through activation-space geometry, layer-wise representation analysis, controlled interventions, and statistical evaluation.
+Its interpretation is not.
 
-Harmony is the hypothesis. The activation geometry is the object of study. The experimental results determine what we can conclude.
+A vector and its negative occupy opposite directions in activation space, but geometric opposition does not guarantee functional opposition. The inverse may suppress features associated with the original direction, activate different features, produce asymmetric behavioral effects, or yield no meaningful effect under certain conditions.
 
-Research Motivation
+The objective is to measure these possibilities rather than assume any of them.
 
-Transformer representations are frequently studied through their observable outputs, similarity metrics, and downstream task performance. Activation steering offers another approach: intervene directly on internal representations and examine the causal consequences.
+The project begins with Gemma and develops a controlled experimental framework for investigating directional inversion, representational geometry, layerwise dynamics, and intervention-dependent behavior.
 
-Recent work investigating pain-associated representations provides a methodological starting point for examining whether particular activation directions have identifiable functional effects.
+## Research Questions
 
-The Harmony Axis extends this line of inquiry by investigating a simple but untested assumption:
+### Primary question
 
-Does moving against a pain-associated activation direction produce a meaningful functional change, or does it merely suppress the original representation?
+Does reversing a pain-associated activation direction produce a computationally distinguishable state, and how does that state differ from the original direction and appropriate controls?
 
-A vector’s inverse does not necessarily encode the semantic or functional opposite of the phenomenon associated with the original vector. Establishing that relationship requires independent measurements, appropriate controls, and reproducible interventions.
+### Secondary questions
 
-This project treats that distinction as its primary experimental problem.
+1. Directional symmetry: Are the effects of positive and negative steering approximately symmetric, or does the model respond differently to each direction?
+2. Representational specificity: Does inverse steering selectively alter features associated with the original direction, or does it produce broader changes in activation structure?
+3. Layerwise emergence: At which layers do these effects become detectable, and how do they evolve through the network?
+4. Contextual stability: Do the observed effects persist across prompt formulations, linguistic contexts, and task conditions?
+5. Behavioral correspondence: Do representational changes correspond to measurable differences in model outputs, beyond changes attributable to generic steering or distribution shift?
+6. Geometric structure: Can the relationship between the original direction, its inverse, and control conditions be characterized using projection, similarity, and local representational geometry?
+7. Dose response: How do these effects vary with steering magnitude, and do they exhibit thresholds, saturation, or nonlinear transitions?
 
-Central Hypothesis
+These questions concern observable computational behavior and representations. They do not presuppose a particular interpretation of the resulting states.
 
-Let the extracted pain-associated direction at transformer layer (l) be:
+---
 
-[
-\mathbf{v}_{p}^{(l)}
-]
+## Theoretical Framework
 
-Define its inverse as:
+### 1. The Pain-Associated Direction
 
-[
-\boxed{
-\mathbf{v}{h}^{(l)}=-\mathbf{v}{p}^{(l)}
-}
-]
+The foundational reference is the Pain Axis work by Tagliabue, Dung, and Berg (2026).
 
-We refer to this candidate direction as the Harmony Axis.
+Their methodology derives activation directions from differences between mean residual-stream activations associated with pain-related inputs and matched controls, with additional processing to reduce control-related variance.
 
-The initial hypothesis is that steering along this direction produces systematic changes in internal representations that can be distinguished from baseline behavior and arbitrary activation perturbations.
+The original paper evaluates these directions through representational discrimination, comparisons with other semantic dimensions, unembedding analyses, and steering interventions.
 
-A stronger hypothesis is that these changes correspond to independently measurable properties of computational harmony, such as task-specific coherence or representational stability.
+This project uses that work as a methodological starting point—not as evidence that an inverse direction must represent harmony.
 
-Neither hypothesis is assumed to be true in advance.
+**Reference:** The Pain Axis — arXiv
 
-In particular, the inverse of a pain-associated direction is not presumed to encode happiness, contentment, or any other positive state.
+**Original implementation:** valen-research/Pain-axis
 
-Research Questions
+### 2. The Inverse Direction
 
-The investigation is organized around five questions:
+Let the original pain-associated direction at layer l be:
 
-1. Representational specificity: Does the candidate Pain Axis reliably distinguish pain-associated examples from relevant controls?
-2. Directional inversion: What changes when the model is steered along the inverse direction?
-3. Geometric structure: Does inverse steering produce reproducible changes in activation-space organization?
-4. Functional consequences: Do these changes predict independently measured behavioral outcomes?
-5. Cross-condition generalization: Are the observed effects robust across inputs, intervention strengths, and relevant model layers?
+$$
+\mathbf{v}_P^{(l)} \in \mathbb{R}^d
+$$
 
-These questions separate the existence of a measurable activation direction from the interpretation of its functional significance.
+where d is the residual-stream dimensionality.
 
-Experimental Framework
+Define the inverse direction:
 
-01 — Direction Extraction
+$$
+\mathbf{v}_H^{(l)} = -\mathbf{v}_P^{(l)}
+$$
 
-Reproduce the relevant activation-extraction procedure from the foundational Pain Axis study using an open-weight Gemma model.
+For a residual-stream activation $\mathbf{h}^{(l)}$, a directional intervention can be expressed as:
 
-Identify the intervention layer, activation representation, normalization procedure, and relevant control conditions.
+$$
+\mathbf{h}'^{(l)} = \mathbf{h}^{(l)} + \alpha\,\mathbf{v}_H^{(l)}
+$$
 
-Evaluate the direction on held-out examples wherever feasible.
+where $\alpha$ controls intervention magnitude.
 
-The initial implementation will prioritize methodological reproducibility over architectural complexity.
+The corresponding positive-direction intervention is:
 
-02 — Controlled Activation Steering
+$$
+\mathbf{h}'^{(l)} = \mathbf{h}^{(l)} + \alpha\,\mathbf{v}_P^{(l)}
+$$
 
-Compare four primary conditions:
+These interventions provide a controlled comparison between opposing directions.
 
-Condition	Intervention
-Baseline	No steering
-Positive steering	Along the candidate Pain Axis
-Inverse steering	Along the candidate Harmony Axis
-Random control	Along a matched-norm random direction
+The inverse vector is not a separately discovered representation. It is defined by reversing the sign of the original vector. Whether that operation produces a meaningful and distinctive computational effect is an empirical question.
 
-Evaluate multiple steering strengths and, where justified, multiple intervention layers.
+### 3. Operationalizing Harmony
 
-This design helps distinguish effects specific to the candidate direction from those produced by generic perturbations.
+In this project, "harmony" is a provisional name for the experimental condition produced by inverse steering.
 
-03 — Representation Analysis
+It is not assumed to be:
 
-Capture intermediate hidden states and examine their response to each intervention.
+- A naturally occurring model state.
+- A representation of happiness or well-being.
+- A general-purpose positive-valence direction.
+- The opposite of every phenomenon associated with pain.
+- A unified latent variable shared across models.
+- An established property of the model’s internal organization.
 
-Candidate measurements include:
+The term becomes scientifically useful only insofar as the proposed condition can be operationalized, measured, distinguished from controls, and independently reproduced.
 
-* Projection onto the Pain Axis and its inverse.
-* Activation magnitude and distribution.
-* Covariance structure and spectral properties.
-* Changes in representational distances and local neighborhoods.
-* Sparse feature activations, where suitable pretrained autoencoders are available.
-* Task performance and behavioral consistency.
+The project therefore separates three levels of analysis:
 
-Each measurement will be interpreted according to its mathematical definition and empirical validity.
+- Geometric — Activation directions: What changes when the direction is reversed?
+- Representational — Features and activation patterns: Which measurable properties change?
+- Functional — Model outputs and task performance: Do representational changes correspond to behavioral effects?
 
-Lower entropy, greater sparsity, reduced variance, and increased geometric stability are not interchangeable outcomes. None will independently be treated as evidence of harmony.
+Evidence at one level does not automatically establish conclusions at another.
 
-04 — Functional Evaluation
+---
 
-Test whether inverse steering produces effects beyond suppression of pain-associated representations.
+## Experimental Architecture
 
-Evaluation will use independently specified conditions and outcomes, with appropriate controls for output suppression, generalized performance degradation, and intervention magnitude.
+The initial experimental system is organized into five stages.
 
-Where positive-condition examples inform the development of candidate measurements, discovery and evaluation data will be separated to reduce circularity.
+### Stage I — Direction Reconstruction
 
-The objective is to determine whether the candidate Harmony Axis predicts outcomes that were not used to define it.
+Reproduce the reference method for extracting the pain-associated direction in a selected Gemma model.
 
-05 — Statistical Evaluation
+The reconstruction should document:
 
-Quantify effect sizes, uncertainty, and reproducibility across experimental conditions.
+- Model checkpoint and tokenizer.
+- Layer selection and residual-stream location.
+- Dataset composition and prompt templates.
+- Token-position selection.
+- Activation aggregation.
+- Control conditions and variance-reduction procedure.
+- Direction normalization.
+- Train/test separation and validation strategy.
 
-Statistical methods will be selected according to the structure of the measurements and the assumptions they require.
+The initial target is Gemma 2 2B, a practical starting point for inspecting layerwise activation behavior.
 
-Feature activation counts, for example, may support binomial models when their assumptions are justified. Dependence between token positions and variation in activation probabilities must be considered rather than assumed away.
+The implementation should first reproduce the direction using the original method as closely as possible. Any methodological changes should be documented separately.
 
-Negative and inconclusive results will be retained as part of the research record.
+### Stage II — Controlled Directional Intervention
 
-Geometric Perspective
+Compare the original direction and its inverse under matched conditions.
 
-The project treats activation space as a high-dimensional representational structure whose properties can be investigated quantitatively.
+| Condition | Intervention | Purpose |
+|---|---:|---|
+| Baseline | None | Establish reference behavior |
+| Positive steering | +α\mathbf{v}_P | Measure effects along the original direction |
+| Inverse steering | −α\mathbf{v}_P | Measure effects along the inverse direction |
+| Random-direction control | Matched-norm random vector | Estimate nonspecific steering effects |
+| Alternative control | Independently derived control direction | Test representational specificity |
 
-Rather than assuming that a physical analogy explains a neural network, we seek measurements that make specific hypotheses falsifiable.
+The experiment should vary steering magnitude and, where feasible, intervention layer.
 
-Relevant methods may include:
+Matched norms are important: otherwise, apparent directional differences may simply reflect different intervention magnitudes.
 
-Directional geometry
+The same prompt sets, decoding parameters, and evaluation procedures should be used across conditions.
 
-Measure the relationship between interventions and activation trajectories through projections, angles, and displacement magnitudes.
+### Stage III — Representational Analysis
 
-Spectral analysis
+Characterize how the intervention changes the model’s internal activation structure.
 
-Examine covariance eigenvalues and their distributions to characterize how representational variance is organized across dimensions.
+Candidate analyses include:
 
-Local geometry
+- Directional projection and signed activation displacement.
+- Cosine similarity between activation vectors.
+- Pairwise distances between condition-level representations.
+- Principal component analysis of activation differences.
+- Layerwise activation distributions.
+- Feature-level analysis using available sparse autoencoders.
+- Unembedding comparisons as a diagnostic of changes in token-associated readout.
 
-Investigate neighborhood structure, distance relationships, and local variation around selected activation states.
+Where appropriate, compare both absolute activations and intervention-induced changes relative to the same baseline prompts.
 
-Information theory
+A change in projection onto the original direction is not, by itself, evidence of a new or distinct state. Complementary measurements are needed to establish the scope and specificity of the effect.
 
-Quantify uncertainty in explicitly defined probability distributions rather than treating arbitrary activation magnitudes as entropy.
+### Stage IV — Functional Evaluation
 
-Causal intervention
+Evaluate model outputs under matched baseline, positive-steering, inverse-steering, and control conditions.
 
-Determine whether manipulating a candidate direction produces predictable changes in internal representations and model behavior.
+Possible measurements include:
 
-Together, these methods provide a framework for investigating the relationship between activation geometry and functional outcomes.
+- Output-category frequencies.
+- Semantic similarity and lexical shifts.
+- Task performance.
+- Response consistency across repeated trials.
+- Prompt sensitivity.
+- Behavioral differences across intervention strengths.
 
-Operationalizing Computational Harmony
+Evaluation criteria should be defined before inspecting final results wherever practical.
 
-Computational harmony is treated as a proposed empirical construct, not an established property of the model.
+Automated judgments may be useful, but they should be validated against transparent criteria and, when appropriate, human review.
 
-Potential indicators include:
+Changes in wording alone should not be interpreted as evidence of a corresponding internal state.
 
-* Reproducible representational changes under controlled intervention.
-* Reduced incidence of specifically defined forms of representational conflict.
-* Improved coherence on independently evaluated tasks.
-* Stability under controlled perturbations.
-* Behavioral changes that cannot be explained solely by suppressing the original signal.
+### Stage V — Robustness and Replication
 
-These indicators require independent definitions and validation.
+Test whether the findings survive changes in:
 
-No single activation statistic will be treated as a sufficient measure of harmony.
+- Prompt wording.
+- Prompt category.
+- Random seed or sampling configuration.
+- Steering magnitude.
+- Intervention layer.
+- Evaluation method.
+- Model checkpoint, where resources permit.
 
-The central criterion is convergence: independently justified measurements should support a consistent interpretation of the intervention’s effects.
+Report null results, unstable effects, and failures to reproduce alongside positive findings.
 
-Scope and Limitations
+---
 
-The initial investigation focuses on open-weight Gemma models and the causal effects of activation steering.
+## Figure Atlas
 
-The project does not assume that:
+The project uses a consistent visual vocabulary to make its experimental results interpretable across conditions and layers.
 
-* The inverse of a pain-associated direction represents its functional opposite.
-* Lower activation entropy indicates a positive computational state.
-* Similar activation patterns imply equivalent functions across architectures.
-* A measurable internal representation establishes the presence of subjective experience.
+These names describe planned analyses and visualizations, not results already obtained.
 
-The distinction between observable computational organization and subjective experience is outside the scope of what activation measurements alone can establish.
+- Figure I — The Antipodal Response: Compare activation and output responses under positive and inverse steering. Plot intervention magnitude against a preregistered measurement of the response.
 
-Cross-architecture comparisons and applications to embedding-specific models may constitute subsequent research directions.
+- Figure II — Directional Symmetry: Quantify the relationship between effects produced by opposing directions.
 
-Expected Contribution
+- Figure III — Layerwise Emergence: Identify where intervention effects become detectable and how they develop across the network.
 
-The intended contribution is a reproducible experimental framework for investigating inverted, pain-associated activation directions in language models.
+- Figure IV — The Harmony–Pain Separation Map: Visualize the geometry of representations under the original and inverse interventions in a shared low-dimensional space.
 
-The investigation may establish that inverse steering produces a distinct functional state, that its effects are limited to suppression of the original representation, or that the proposed hypothesis is not supported under the tested conditions.
+- Figure V — The Residual-State Portrait: Compare activation distributions and intervention-induced changes across conditions.
 
-Each outcome constrains our understanding of how activation directions relate to model behavior.
+- Figure VI — Intervention Topology: Characterize how representational and behavioral measurements vary with steering strength.
 
-The broader objective is to develop a more rigorous account of the relationship between representation geometry, controlled interventions, and measurable computational states.
+- Figure VII — The Control Atlas: Establish whether observed effects are specific to the reference direction by comparing with matched-norm random directions and other controls.
 
-⸻
+- Figure VIII — Cross-Context Robustness: Evaluate whether the effect persists across prompt categories and linguistic formulations.
 
-Status
+- Figure IX — Representational Specificity: Determine whether inverse steering selectively affects features associated with the original direction.
 
-Research stage: Hypothesis formulation and experimental design.
+---
 
-Implementation, reproduction of the foundational findings, and empirical validation remain to be completed.
+## Analysis Principles
 
-No results are claimed at this stage.
+- Separate geometry from semantics: The fact that two vectors point in opposite directions is a geometric statement. Whether their effects correspond to opposing semantic or behavioral patterns requires independent measurement.
+- Distinguish intervention from observation: An intervention tests how the model responds to a controlled perturbation. It does not automatically reveal the meaning of a naturally occurring activation pattern.
+- Report uncertainty: Where applicable, report confidence intervals, effect sizes, sample counts, and variation across prompts or runs.
+- Keep exploratory and confirmatory analyses distinct: Exploratory analyses can generate hypotheses; confirmatory analyses should specify measurements and comparisons in advance where feasible.
+- Preserve negative results: A lack of detectable differentiation is informative and should be reported and investigated.
 
-Foundational Research
+---
 
-* The Pain Axis: Identifying Internal Representations of AI Suffering — arXiv search
+## Scientific Context and Limitations
 
-The foundational study should be consulted directly when implementing the activation-extraction procedure and defining the reproduction criteria.
+The Pain Axis provides a starting point for studying pain-associated activation directions and steering interventions. It does not establish that reversing such a direction yields a distinct harmony-associated representation.
 
-Research Principle
+An independent replication, treeline-lab/pain-axis-replication, raises methodological questions about interpreting relief-seeking behavior in the original experimental setup. This project treats those questions as reasons to strengthen the experimental design.
 
-A mathematical inverse is not yet a functional opposite. A measurable change is not yet an explanation. The objective is to discover what survives controlled intervention, independent measurement, and replication.
+The initial implementation is limited to selected model checkpoints, layers, datasets, and intervention configurations. Findings should not be generalized beyond the tested conditions without additional evidence.
+
+---
+
+## Repository Roadmap
+
+The repository is intended to develop into a reproducible experimental pipeline.
+
+```
+harmony-axis/
+├── README.md
+├── configs/
+│   ├── model.yaml
+│   ├── extraction.yaml
+│   └── interventions.yaml
+├── data/
+│   ├── prompts/
+│   └── controls/
+├── src/
+│   ├── extraction/
+│   ├── directions/
+│   ├── interventions/
+│   ├── representations/
+│   └── evaluation/
+├── experiments/
+│   ├── 01_direction_reconstruction/
+│   ├── 02_antipodal_intervention/
+│   ├── 03_layerwise_emergence/
+│   ├── 04_representational_geometry/
+│   └── 05_robustness/
+├── results/
+│   ├── metrics/
+│   ├── figures/
+│   └── reports/
+├── tests/
+└── requirements.txt
+```
+
+This is a proposed organizational structure, not a claim that every component has already been implemented.
+
+Experiment configurations, model identifiers, random seeds, and analysis parameters should be versioned alongside corresponding results.
+
+---
+
+## Initial Milestones
+
+1. Reconstruct: Reproduce the reference direction extraction procedure for the selected Gemma checkpoint and validate its basic properties.
+2. Invert: Implement matched positive and inverse steering interventions, with baseline and random-direction controls.
+3. Characterize: Measure directional projections, activation changes, and layerwise effects.
+4. Visualize: Generate the initial figure atlas from measured data, including uncertainty and control comparisons where appropriate.
+5. Evaluate: Test output-level consequences using predefined metrics and matched prompts.
+6. Stress-test: Investigate robustness across prompt contexts, intervention strengths, and alternative explanations.
+7. Replicate: Document the conditions under which the effect does—or does not—generalize.
+
+---
+
+## Current Status
+
+- Phase: Research design and experimental implementation.
+- Starting model: Gemma 2 2B.
+- Reference method: The Pain Axis.
+- Primary intervention: Sign inversion of a pain-associated activation direction.
+- Primary objective: Determine whether inverse steering produces a reproducible, distinguishable computational effect beyond the expected consequences of a generic directional perturbation.
+
+No empirical findings are claimed until the relevant experiments have been run and evaluated.
+
+---
+
+## References
+
+- Tagliabue, V., Dung, L., & Berg, C. (2026). The Pain Axis: LLMs Represent Self-Directed Harm and Act to Relieve It.
+  - Paper: https://arxiv.org/abs/2609.16247
+  - Original implementation: https://github.com/valen-research/Pain-axis
+
+- Allchin, J. E., Allchin, A. E., & Allchin, J. J. (2026). Relief-seeking or steering? A replication and extension of The Pain Axis.
+  - Replication repository: https://github.com/treeline-lab/pain-axis-replication
+
+---
+
+<p align="center">
+  <em>Opposition is a property of geometry. Meaning is a property to be investigated.</em>
+</p>
